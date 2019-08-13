@@ -13,7 +13,9 @@ export default [
             commonjs(),
             builtins(),
             globals(),
-            buble(),
+            buble({
+                transforms: {asyncAwait: false}
+            }),
             terser()
         ],
         output: // ES module version, for modern browsers
@@ -30,7 +32,9 @@ export default [
             commonjs(),
             builtins(),
             globals(),
-            buble(),
+            buble({
+                transforms: {asyncAwait: false}
+            }),
             terser()
         ],
         output: // SystemJS version, for older browsers
@@ -47,7 +51,9 @@ export default [
             commonjs(),
             builtins(),
             globals(),
-            buble(),
+            buble({
+                transforms: {asyncAwait: false}
+            }),
             terser()
         ],
         output: // CJS version

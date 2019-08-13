@@ -357,7 +357,7 @@ export class DataTable {
         this.container.appendChild(this.table)
 
         // Store the table dimensions
-        this.rect = this.table.getBoundingClientRect()
+        this.updateRect()
 
         // Convert rows to array for processing
         this.data = [].slice.call(this.body.rows)
@@ -625,9 +625,17 @@ export class DataTable {
         })
 
         on(window, "resize", () => {
-            this.rect = this.container.getBoundingClientRect()
+            this.updateRect()
             this.fixColumns()
         })
+    }
+
+    async updateRect() {
+        if ( this.container.getBoundingClientRectAsync ) {
+            this.rect = await this.container.getBoundingClientRectAsync();
+        } else {
+            this.rect = this.container.getBoundingClientRect()
+        }
     }
 
     /**
@@ -796,6 +804,10 @@ export class DataTable {
      */
     fixColumns() {
 
+        if ( !this.rect ) {
+            this.updateRect();
+        }
+
         if ((this.options.scrollY.length || this.options.fixedColumns) && this.activeHeadings && this.activeHeadings.length) {
             let cells
             let hd = false
@@ -904,7 +916,7 @@ export class DataTable {
     fixHeight() {
         if (this.options.fixedHeight) {
             this.container.style.height = null
-            this.rect = this.container.getBoundingClientRect()
+            this.updateRect()
             this.container.style.height = `${this.rect.height}px`
         }
     }
