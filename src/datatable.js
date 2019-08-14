@@ -804,7 +804,7 @@ export class DataTable {
      */
     fixColumns() {
 
-        if ( !this.rect ) {
+        if ( !this.rect && this.container ) {
             this.updateRect();
         }
 
