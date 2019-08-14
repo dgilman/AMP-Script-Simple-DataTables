@@ -224,7 +224,7 @@ export class DataTable {
             const t = createElement("tr")
 
             if (this.hasRows) {
-                each(this.body.rows[0].children, () => {
+                each(this.body.rows[0].cells, () => {
                     t.appendChild(createElement("th"))
                 })
 
@@ -243,7 +243,7 @@ export class DataTable {
 
         if (this.hasHeadings) {
             this.header = this.head.rows[0]
-            this.headings = [].slice.call(this.header.children)
+            this.headings = [].slice.call(this.header.cells)
         }
 
         // Header
@@ -650,7 +650,7 @@ export class DataTable {
 
         if (!ajax) {
             each(this.data, row => {
-                each(row.children, cell => {
+                each(row.cells, cell => {
                     cell.data = cell.innerHTML
                 })
             })
@@ -704,14 +704,14 @@ export class DataTable {
         if (this.hasRows) {
             each(this.data, (row, i) => {
                 row.dataIndex = i
-                each(row.children, cell => {
+                each(row.cells, cell => {
                     cell.data = cell.innerHTML
                 })
             })
 
             if (this.selectedColumns.length) {
                 each(this.data, row => {
-                    each(row.children, (cell, i) => {
+                    each(row.cells, (cell, i) => {
                         if (this.selectedColumns.includes(i)) {
                             each(this.columnRenderers, o => {
                                 if (o.columns.includes(i)) {
@@ -882,7 +882,7 @@ export class DataTable {
                 // Make temperary headings
                 hd = createElement("thead")
                 const r = createElement("tr")
-                const c = this.table.tBodies[0].rows[0].children
+                const c = this.table.tBodies[0].rows[0].cells
                 each(c, () => {
                     const th = createElement("th")
                     r.appendChild(th)
@@ -901,7 +901,7 @@ export class DataTable {
                 }, this)
 
                 each(this.data, function (row) {
-                    each(row.children, function (cell, i) {
+                    each(row.cells, function (cell, i) {
                         if (this.columns(cell.cellIndex).visible())
                             cell.style.width = `${widths[i]}%`
                     }, this)
@@ -958,8 +958,8 @@ export class DataTable {
                 let cell = null
                 let content = null
 
-                for (let x = 0; x < row.childElementCount; x++) {
-                    cell = row.children[x]
+                for (let x = 0; x < row.cells.length; x++) {
+                    cell = row.cells[x]
                     content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.textContent
 
                     if (
@@ -1052,7 +1052,7 @@ export class DataTable {
                     this.head.appendChild(tr)
 
                     this.header = tr
-                    this.headings = [].slice.call(tr.children)
+                    this.headings = [].slice.call(tr.cells)
                     this.hasHeadings = true
 
                     // Re-enable sorting if it was disabled due
@@ -1203,13 +1203,13 @@ export class DataTable {
                     str = ""
 
                     for (i = 0; i < rows.length; i++) {
-                        for (x = 0; x < rows[i].childElementCount; x++) {
+                        for (x = 0; x < rows[i].cells.length; x++) {
                             // Check for column skip and visibility
                             if (
                                 !o.skipColumn.includes(headers[x].originalCellIndex) &&
                                 this.columns(headers[x].originalCellIndex).visible()
                             ) {
-                                let text = rows[i].children[x].textContent
+                                let text = rows[i].cells[x].textContent
                                 text = text.trim()
                                 text = text.replace(/\s{2,}/g, ' ')
                                 text = text.replace(/\n/g, '  ')
@@ -1261,13 +1261,13 @@ export class DataTable {
                     for (i = 0; i < rows.length; i++) {
                         str += "("
 
-                        for (x = 0; x < rows[i].childElementCount; x++) {
+                        for (x = 0; x < rows[i].cells.length; x++) {
                             // Check for column skip and column visibility
                             if (
                                 !o.skipColumn.includes(headers[x].originalCellIndex) &&
                                 this.columns(headers[x].originalCellIndex).visible()
                             ) {
-                                str += `"${rows[i].children[x].textContent}",`
+                                str += `"${rows[i].cells[x].textContent}",`
                             }
                         }
 
@@ -1298,7 +1298,7 @@ export class DataTable {
                                 !o.skipColumn.includes(headers[i].originalCellIndex) &&
                                 this.columns(headers[i].originalCellIndex).visible()
                             ) {
-                                arr[x][headers[i].textContent] = rows[x].children[i].textContent
+                                arr[x][headers[i].textContent] = rows[x].cells[i].textContent
                             }
                         }
                     }
@@ -1454,7 +1454,7 @@ export class DataTable {
 
         each(rows, row => {
             const tr = createElement("tr")
-            each(row.children, cell => {
+            each(row.cells, cell => {
                 tr.appendChild(
                     createElement("td", {
                         html: cell.textContent
@@ -1485,7 +1485,7 @@ export class DataTable {
         let colspan = 1
 
         if (this.hasRows) {
-            colspan = this.data[0].childElementCount
+            colspan = this.data[0].cells.length
         } else if (this.activeHeadings.length) {
             colspan = this.activeHeadings.length
         }

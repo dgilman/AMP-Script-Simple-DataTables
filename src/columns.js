@@ -88,13 +88,13 @@ export class Columns {
 
             // Append the cell to the fragment in the correct order
             each(columns, column => {
-                cell = row.children[column].cloneNode(true)
-                cell.data = row.children[column].data
+                cell = row.cells[column].cloneNode(true)
+                cell.data = row.cells[column].data
                 c.appendChild(cell)
 
                 if (!dt.hiddenColumns.includes(column)) {
-                    cell = row.children[column].cloneNode(true)
-                    cell.data = row.children[column].data
+                    cell = row.cells[column].cloneNode(true)
+                    cell.data = row.cells[column].data
                     d.appendChild(cell)
                 }
             })
@@ -256,7 +256,7 @@ export class Columns {
             this.dt.headings.splice(select, 1)
 
             each(this.dt.data, row => {
-                row.removeChild(row.children[select])
+                row.removeChild(row.cells[select])
             })
         }
 
@@ -303,7 +303,7 @@ export class Columns {
 
         Promise.all(waitFor).then(() => {
             Array.from(rows).forEach(tr => {
-                const cell = tr.children[column]
+                const cell = tr.cells[column]
                 const content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.innerText
                 const num = parseFunction(typeof content==="string" ? content.replace(/(\$|,|\s|%)/g, "") : content)
 
@@ -411,7 +411,7 @@ export class Columns {
             }
 
             // Append the cell to the fragment in the correct order
-            each(row.children, cell => {
+            each(row.cells, cell => {
                 c = cell.cloneNode(true)
                 c.data = cell.data
                 a.appendChild(c)
