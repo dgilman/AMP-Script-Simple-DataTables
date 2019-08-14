@@ -126,7 +126,7 @@ export class DataTable {
      * @param  {String} type
      * @return {Void}
      */
-    render(type) {
+    async render(type) {
         if (type) {
             switch (type) {
             case "page":
@@ -361,7 +361,7 @@ export class DataTable {
         this.container.appendChild(this.table)
 
         // Store the table dimensions
-        this.updateRect()
+        await this.updateRect()
 
         // Convert rows to array for processing
         this.data = [].slice.call(this.body.rows)
@@ -633,7 +633,15 @@ export class DataTable {
         })
     }
 
+    /**
+     * Update rect.
+     *
+     * @returns {void}
+     */
     async updateRect() {
+        if ( !this.container ) {
+            return;
+        }
         if ( this.container.getBoundingClientRectAsync ) {
             this.rect = await this.container.getBoundingClientRectAsync();
         } else {
@@ -803,12 +811,13 @@ export class DataTable {
 
     /**
      * Fix column widths
-     * @return {Void}
+     * @return {void}
      */
     fixColumns() {
 
-        if ( !this.rect && this.container ) {
-            this.updateRect();
+        // Prevent fixing columns when the rect hasn't been set yet (such as when the header is rendering from a call in the initial render.
+        if ( !this.rect || !this.rect.width || !this.rect.height ) {
+            return;
         }
 
         if ((this.options.scrollY.length || this.options.fixedColumns) && this.activeHeadings && this.activeHeadings.length) {
