@@ -304,7 +304,7 @@ export class Columns {
         Promise.all(waitFor).then(() => {
             Array.from(rows).forEach(tr => {
                 const cell = tr.cells[column]
-                const content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.innerText
+                const content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.textContent.trim()
                 const num = parseFunction(typeof content==="string" ? content.replace(/(\$|,|\s|%)/g, "") : content)
 
                 if (parseFloat(num) == num) {
