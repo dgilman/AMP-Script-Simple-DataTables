@@ -79,8 +79,8 @@ export class DataTable {
      * @return {Void}
      */
     init(options) {
-        if (this.initialized || classList.contains(this.table, "dataTable-table")) {
-            return false
+        if (this.initialized) {
+            return;
         }
 
         this.options = extend(this.options, options || {})
@@ -122,6 +122,23 @@ export class DataTable {
     }
 
     /**
+     * Finish initialized prerendered data tables.
+     */
+    finishPrerenderedInit() {
+        if ( !this.options.prerendered ) {
+            return;
+        }
+
+        // Remove the hidden flag from prerendered table.
+        for ( const row of this.data ) {
+            row.hidden = false;
+        }
+        this.fixColumns();
+
+        this.options.prerendered = false;
+    }
+
+    /**
      * Render the instance
      * @param  {String} type
      * @return {Void}
@@ -144,7 +161,6 @@ export class DataTable {
         }
 
         const o = this.options
-        let template = ""
 
         // Convert data to HTML
         if (o.data) {
@@ -209,8 +225,12 @@ export class DataTable {
         this.body = this.table.tBodies[0]
         this.head = this.table.tHead
         this.foot = this.table.tFoot
+        this.originalHeadingCellIndices = new Map();
 
         if (!this.body) {
+            if ( !this.initialized && o.prerendered ) {
+                throw new Error( 'Prerendered datatable lacked tbody.' );
+            }
             this.body = createElement("tbody")
 
             this.table.appendChild(this.body)
@@ -220,6 +240,9 @@ export class DataTable {
 
         // Make a tHead if there isn't one (fixes #8)
         if (!this.head) {
+            if ( !this.initialized && o.prerendered ) {
+                throw new Error( 'Prerendered datatable lacked thead.' );
+            }
             const h = createElement("thead")
             const t = createElement("tr")
 
@@ -268,87 +291,138 @@ export class DataTable {
         }
 
         // Build
-        this.wrapper = createElement("div", {
-            class: "dataTable-wrapper dataTable-loading"
-        })
+        if ( o.prerendered ) {
+            this.wrapper = this.table.parentNode.parentNode;
+            if ( !this.wrapper || !this.wrapper.classList.contains( 'dataTable-wrapper' ) ) {
+                throw new Error( 'Prerendered lacks .dataTable-wrapper' );
+            }
+        } else {
+            this.wrapper = createElement("div", {
+                class: "dataTable-wrapper dataTable-loading"
+            })
+        }
 
         // Template for custom layouts
-        template += "<div class='dataTable-top'>"
-        template += o.layout.top
-        template += "</div>"
-        if (o.scrollY.length) {
-            template += `<div class='dataTable-container' style='height: ${o.scrollY}; overflow-Y: auto;'></div>`
-        } else {
-            template += "<div class='dataTable-container'></div>"
-        }
-        template += "<div class='dataTable-bottom'>"
-        template += o.layout.bottom
-        template += "</div>"
+        if ( !o.prerendered ) {
+            let template = ""
+            template += "<div class='dataTable-top'>"
+            template += o.layout.top
+            template += "</div>"
+            if (o.scrollY.length) {
+                template += `<div class='dataTable-container' style='height: ${o.scrollY}; overflow-Y: auto;'></div>`
+            } else {
+                template += "<div class='dataTable-container'></div>"
+            }
+            template += "<div class='dataTable-bottom'>"
+            template += o.layout.bottom
+            template += "</div>"
 
-        // Info placement
-        template = template.replace("{info}", o.paging ? "<div class='dataTable-info'></div>" : "")
+            // Info placement
+            template = template.replace("{info}", o.paging ? "<div class='dataTable-info'></div>" : "")
 
-        // Per Page Select
-        if (o.paging && o.perPageSelect) {
-            let wrap = "<div class='dataTable-dropdown'><label>"
-            wrap += o.labels.perPage
-            wrap += "</label></div>"
+            // Per Page Select
+            if (o.paging && o.perPageSelect) {
+                let wrap = "<div class='dataTable-dropdown'><label>"
+                wrap += o.labels.perPage
+                wrap += "</label></div>"
 
-            // Create the select
-            const select = createElement("select", {
-                class: "dataTable-selector"
+                // Create the select
+                const select = createElement("select", {
+                    class: "dataTable-selector"
+                })
+
+                // Create the options
+                each(o.perPageSelect, val => {
+                    const selected = val === o.perPage
+                    const option = document.createElement('option')
+                    option.text = val
+                    option.value = val
+                    option.selected = selected
+                    option.defaultSelected = selected
+                    select.appendChild(option)
+                })
+
+                // Custom label
+                wrap = wrap.replace("{select}", select.outerHTML)
+
+                // Selector placement
+                template = template.replace("{select}", wrap)
+            } else {
+                template = template.replace("{select}", "")
+            }
+
+            // Searchable
+            if (o.searchable) {
+                const form =
+                    `<div class='dataTable-search'><input class='dataTable-input' placeholder='${o.labels.placeholder}' type='text'></div>`
+
+                // Search input placement
+                template = template.replace("{search}", form)
+            } else {
+                template = template.replace("{search}", "")
+            }
+
+            if (this.hasHeadings) {
+                // Sortable
+                this.render("header")
+            }
+
+            // Add table class
+            classList.add(this.table, "dataTable-table")
+
+            // Paginator
+            const w = createElement("div", {
+                class: "dataTable-pagination"
             })
+            const paginator = createElement("ul")
+            w.appendChild(paginator)
 
-            // Create the options
-            each(o.perPageSelect, val => {
-                const selected = val === o.perPage
-                const option = document.createElement('option')
-                option.text = val
-                option.value = val
-                option.selected = selected
-                option.defaultSelected = selected
-                select.appendChild(option)
-            })
+            // Pager(s) placement
+            template = template.replace(/\{pager\}/g, w.outerHTML)
 
-            // Custom label
-            wrap = wrap.replace("{select}", select.outerHTML)
-
-            // Selector placement
-            template = template.replace("{select}", wrap)
+            this.wrapper.innerHTML = template
         } else {
-            template = template.replace("{select}", "")
+            const dataTableTop = this.wrapper.querySelector('.dataTable-top');
+            if ( !dataTableTop ) {
+                throw new Error( 'Datatable missing dataTable-top.' );
+            }
+            const dataTableContainer = this.wrapper.querySelector('.dataTable-container');
+            if ( !dataTableContainer ) {
+                throw new Error( 'Datatable missing dataTable-container.' );
+            }
+            const dataTableBottom = this.wrapper.querySelector('.dataTable-bottom')
+            if ( !dataTableBottom ) {
+                throw new Error( 'Datatable missing dataTable-bottom.' );
+            }
+            if (o.paging && o.perPageSelect && !this.wrapper.querySelector('.dataTable-dropdown')) {
+                throw new Error( 'Datatable is missing .dataTable-dropdown' );
+            }
+            if (o.searchable && !(this.wrapper.querySelector('.dataTable-search') && this.wrapper.querySelector('.dataTable-input'))) {
+                throw new Error( 'Datatable is missing .dataTable-search or .dataTable-input' );
+            }
+            if ( !this.wrapper.querySelector('.dataTable-pagination') ) {
+                throw new Error( 'Datatable missing .dataTable-pagination' );
+            }
+            if (this.hasHeadings) {
+                this.labels = []
+                each(this.headings, (th, i) => {
+                    this.labels[i] = th.textContent
+
+                    if (!th.hasAttribute("data-sortable")) {
+                        throw new Error('Expected datatable th to have a data-sortable attribute.')
+                    }
+
+                    const sortable = th.getAttribute("data-sortable") !== "false"
+
+                    this.originalHeadingCellIndices.set(th, i)
+                    if (this.options.sortable && sortable) {
+                        if (!th.firstElementChild || !th.firstElementChild.classList.contains('dataTable-sorter')) {
+                            throw new Error('Expected datatable th to contain a dataTable-sorter');
+                        }
+                    }
+                })
+            }
         }
-
-        // Searchable
-        if (o.searchable) {
-            const form =
-                `<div class='dataTable-search'><input class='dataTable-input' placeholder='${o.labels.placeholder}' type='text'></div>`
-
-            // Search input placement
-            template = template.replace("{search}", form)
-        } else {
-            template = template.replace("{search}", "")
-        }
-
-        if (this.hasHeadings) {
-            // Sortable
-            this.render("header")
-        }
-
-        // Add table class
-        classList.add(this.table, "dataTable-table")
-
-        // Paginator
-        const w = createElement("div", {
-            class: "dataTable-pagination"
-        })
-        const paginator = createElement("ul")
-        w.appendChild(paginator)
-
-        // Pager(s) placement
-        template = template.replace(/\{pager\}/g, w.outerHTML)
-
-        this.wrapper.innerHTML = template
 
         this.container = this.wrapper.querySelector(".dataTable-container")
 
@@ -357,8 +431,10 @@ export class DataTable {
         this.label = this.wrapper.querySelector(".dataTable-info")
 
         // Insert in to DOM tree
-        this.table.parentNode.replaceChild(this.wrapper, this.table)
-        this.container.appendChild(this.table)
+        if ( !o.prerendered ) {
+            this.table.parentNode.replaceChild( this.wrapper, this.table )
+            this.container.appendChild( this.table )
+        }
 
         // Store the table dimensions
         await this.updateRect()
@@ -371,39 +447,79 @@ export class DataTable {
         // Update
         this.update()
 
-        if (!o.ajax) {
+        if (!o.ajax && !o.prerendered) {
             this.setColumns()
         }
 
         // Fix height
-        this.fixHeight()
+        if ( !o.prerendered ) {
+            this.fixHeight() // @todo Defer until first user interaction.
+        }
 
         // Fix columns
-        this.fixColumns()
+        if ( !o.prerendered ) {
+            this.fixColumns() // @todo Defer until first user interaction.
+        }
 
         // Class names
         if (!o.header) {
-            classList.add(this.wrapper, "no-header")
+            if ( o.prerendered )  {
+                if ( !this.wrapper.classList.contains('no-header') ) {
+                    throw new Error( 'Expected datatable to have no-header class name.' );
+                }
+            } else {
+                classList.add(this.wrapper, "no-header")
+            }
         }
 
         if (!o.footer) {
-            classList.add(this.wrapper, "no-footer")
+            if ( o.prerendered ) {
+                if ( !this.wrapper.classList.contains('no-footer') ) {
+                    throw new Error( 'Expected datatable to have no-footer class name.' );
+                }
+            } else {
+                classList.add( this.wrapper, "no-footer" )
+            }
         }
 
         if (o.sortable) {
-            classList.add(this.wrapper, "sortable")
+            if ( o.prerendered ) {
+                if ( !this.wrapper.classList.contains('sortable') ) {
+                    throw new Error( 'Expected datatable to have sortable class name.' );
+                }
+            } else {
+                classList.add( this.wrapper, "sortable" )
+            }
         }
 
         if (o.searchable) {
-            classList.add(this.wrapper, "searchable")
+            if ( o.prerendered ) {
+                if ( !this.wrapper.classList.contains( 'searchable' ) ) {
+                    throw new Error( 'Expected datatable to have searchable class name.' );
+                }
+            } else {
+                classList.add( this.wrapper, "searchable" )
+            }
         }
 
         if (o.fixedHeight) {
-            classList.add(this.wrapper, "fixed-height")
+            if ( o.prerendered ) {
+                if ( !this.wrapper.classList.contains( 'fixed-height' ) ) {
+                    throw new Error( 'Expected datatable to have fixed-height class name.' );
+                }
+            } else {
+                classList.add( this.wrapper, "fixed-height" )
+            }
         }
 
         if (o.fixedColumns) {
-            classList.add(this.wrapper, "fixed-columns")
+            if ( o.prerendered ) {
+                if ( !this.wrapper.classList.contains( 'fixed-columns' ) ) {
+                    throw new Error( 'Expected datatable to have fixed-columns class name.' );
+                }
+            } else {
+                classList.add( this.wrapper, "fixed-columns" )
+            }
         }
 
         this.bindEvents()
@@ -559,7 +675,7 @@ export class DataTable {
 
                 th.sortable = th.getAttribute("data-sortable") !== "false"
 
-                th.originalCellIndex = i
+                this.originalHeadingCellIndices.set(th, i);
                 if (this.options.sortable && th.sortable) {
                     const link = createElement("a", {
                         role: "button",
@@ -591,6 +707,7 @@ export class DataTable {
             if (selector) {
                 // Change per page
                 on(selector, "change", function () {
+                    that.finishPrerenderedInit();
                     o.perPage = parseInt(this.value, 10)
                     that.update()
 
@@ -606,6 +723,7 @@ export class DataTable {
             this.input = this.wrapper.querySelector(".dataTable-input")
             if (this.input) {
                 on(this.input, "keyup", function () {
+                    that.finishPrerenderedInit();
                     that.search(this.value)
                 })
             }
@@ -613,6 +731,8 @@ export class DataTable {
 
         // Pager(s) / sorting
         on(this.wrapper, "click", e => {
+            this.finishPrerenderedInit();
+
             const t = e.target
             if (t.nodeName.toLowerCase() === "a") {
                 if (t.hasAttribute("data-page")) {
@@ -628,6 +748,9 @@ export class DataTable {
         })
 
         on(window, "resize", () => {
+            if ( this.options.prerendered ) {
+                return;
+            }
             this.updateRect()
             this.fixColumns()
         })
@@ -1214,8 +1337,8 @@ export class DataTable {
                         for (x = 0; x < rows[i].cells.length; x++) {
                             // Check for column skip and visibility
                             if (
-                                !o.skipColumn.includes(headers[x].originalCellIndex) &&
-                                this.columns(headers[x].originalCellIndex).visible()
+                                !o.skipColumn.includes(this.originalHeadingCellIndices.get(headers[x])) &&
+                                this.columns(this.originalHeadingCellIndices.get(headers[x])).visible()
                             ) {
                                 let text = rows[i].cells[x].textContent
                                 text = text.trim()
@@ -1272,8 +1395,8 @@ export class DataTable {
                         for (x = 0; x < rows[i].cells.length; x++) {
                             // Check for column skip and column visibility
                             if (
-                                !o.skipColumn.includes(headers[x].originalCellIndex) &&
-                                this.columns(headers[x].originalCellIndex).visible()
+                                !o.skipColumn.includes(this.originalHeadingCellIndices.get(headers[x])) &&
+                                this.columns(this.originalHeadingCellIndices.get(headers[x])).visible()
                             ) {
                                 str += `"${rows[i].cells[x].textContent}",`
                             }

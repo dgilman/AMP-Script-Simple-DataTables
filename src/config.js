@@ -42,5 +42,8 @@ export const defaultConfig = {
     layout: {
         top: "{select}{search}",
         bottom: "{info}{pager}"
-    }
+    },
+
+    // Allow server to pre-render the UI to avoid DOM mutation at page load.
+    prerendered: false
 }
