@@ -100,7 +100,7 @@ export const createElement = (a, b) => {
 }
 
 export const flush = (el, ie) => {
-    if (el instanceof NodeList) {
+    if (typeof el.length === 'number') {
         each(el, e => {
             flush(e, ie)
         })
