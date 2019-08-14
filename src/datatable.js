@@ -302,8 +302,12 @@ export class DataTable {
             // Create the options
             each(o.perPageSelect, val => {
                 const selected = val === o.perPage
-                const option = new Option(val, val, selected, selected)
-                select.add(option)
+                const option = document.createElement('option')
+                option.text = val
+                option.value = val
+                option.selected = selected
+                option.defaultSelected = selected
+                select.appendChild(option)
             })
 
             // Custom label
