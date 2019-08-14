@@ -392,7 +392,7 @@ export class Columns {
 
         const cloned = document.createElement( node.nodeName );
         for ( let i = 0; i < node.attributes.length; i++ ) {
-            cloned.setAttribute( node.attributes[i].nodeName, node.attributes[i].nodeValue );
+            cloned.setAttribute( node.attributes[i].name, node.attributes[i].value );
         }
 
         if ( deep ) {
