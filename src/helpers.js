@@ -124,7 +124,7 @@ export const flush = (el, ie) => {
  */
 export const button = (c, p, t) => createElement("li", {
     class: c,
-    html: `<a href="#" data-page="${p}">${t}</a>`
+    html: `<a role="button" tabindex="0" data-page="${p}">${t}</a>`
 })
 
 /**
@@ -225,7 +225,7 @@ export const truncate = (a, b, c, d, ellipsis) => {
             else if (d - e != 1) {
                 const f = createElement("li", {
                     class: "ellipsis",
-                    html: `<a href="#">${ellipsis}</a>`
+                    html: `<a role="button" tabindex="0">${ellipsis}</a>`
                 })
                 i.push(f)
             }

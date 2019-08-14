@@ -562,7 +562,8 @@ export class DataTable {
                 th.originalCellIndex = i
                 if (this.options.sortable && th.sortable) {
                     const link = createElement("a", {
-                        href: "#",
+                        role: "button",
+                        tabindex: "0",
                         class: "dataTable-sorter",
                         html: th.innerHTML
                     })
@@ -616,14 +617,12 @@ export class DataTable {
             if (t.nodeName.toLowerCase() === "a") {
                 if (t.hasAttribute("data-page")) {
                     this.page(t.getAttribute("data-page"))
-                    e.preventDefault()
                 } else if (
                     o.sortable &&
                     classList.contains(t, "dataTable-sorter") &&
                     t.parentNode.getAttribute("data-sortable") != "false"
                 ) {
                     this.columns().sort(this.headings.indexOf(t.parentNode))
-                    e.preventDefault()
                 }
             }
         })
