@@ -1,4 +1,4 @@
-import {isArray, each, classList, sortItems} from "./helpers"
+import {isArray, each, classList, sortItems, cloneNode} from "./helpers"
 
 /**
  * Columns API
@@ -60,14 +60,14 @@ export class Columns {
         each(columns, (column, x) => {
             h = dt.headings[column]
             s = h.getAttribute("data-sortable") !== "false"
-            a = this.cloneNode( h, true)
+            a = cloneNode( h, true)
             a.originalCellIndex = x
             a.sortable = s
 
             temp[0].push(a)
 
             if (!dt.hiddenColumns.includes(column)) {
-                b = this.cloneNode( h, true)
+                b = cloneNode( h, true)
                 b.originalCellIndex = x
                 b.sortable = s
 
@@ -77,8 +77,8 @@ export class Columns {
 
         // Order the row cells
         each(dt.data, (row, i) => {
-            c = this.cloneNode( row, false)
-            d = this.cloneNode( row, false)
+            c = cloneNode( row, false)
+            d = cloneNode( row, false)
 
             c.dataIndex = d.dataIndex = i
 
@@ -88,12 +88,12 @@ export class Columns {
 
             // Append the cell to the fragment in the correct order
             each(columns, column => {
-                cell = this.cloneNode( row.cells[column], true )
+                cell = cloneNode( row.cells[column], true )
                 cell.data = row.cells[column].data
                 c.appendChild(cell)
 
                 if (!dt.hiddenColumns.includes(column)) {
-                    cell = this.cloneNode( row.cells[column], true )
+                    cell = cloneNode( row.cells[column], true )
                     cell.data = row.cells[column].data
                     d.appendChild(cell)
                 }
@@ -377,32 +377,6 @@ export class Columns {
     }
 
     /**
-     * Clone node.
-     *
-     * This is a workaround where Element.cloneNode() seems to fail on some elements (e.g. tr and td).
-     *
-     * @param {Node|Element} node - Node
-     * @param {Boolean} deep - Deep cloning.
-     * @returns {Node} Cloned node.
-     */
-    cloneNode( node, deep = false ) {
-        if ( 1 !== node.nodeType ) {
-            return node.cloneNode( deep );
-        }
-
-        const cloned = document.createElement( node.nodeName );
-        for ( let i = 0; i < node.attributes.length; i++ ) {
-            cloned.setAttribute( node.attributes[i].name, node.attributes[i].value );
-        }
-
-        if ( deep ) {
-            cloned.innerHTML = node.innerHTML;
-        }
-
-        return cloned;
-    }
-
-    /**
      * Rebuild the columns
      * @return {Void}
      */
@@ -427,8 +401,8 @@ export class Columns {
 
         // Loop over the rows and reorder the cells
         each(dt.data, (row, i) => {
-            a = this.cloneNode( row, false)
-            b = this.cloneNode( row, false)
+            a = cloneNode( row, false)
+            b = cloneNode( row, false)
 
             a.dataIndex = b.dataIndex = i
 
@@ -438,12 +412,12 @@ export class Columns {
 
             // Append the cell to the fragment in the correct order
             each(row.cells, cell => {
-                c = this.cloneNode( cell, true)
+                c = cloneNode( cell, true)
                 c.data = cell.data
                 a.appendChild(c)
 
                 if (!dt.hiddenColumns.includes(c.cellIndex)) {
-                    d = this.cloneNode( c, true)
+                    d = cloneNode( c, true)
                     d.data = c.data
                     b.appendChild(d)
                 }

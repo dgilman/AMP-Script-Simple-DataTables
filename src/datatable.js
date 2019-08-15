@@ -13,7 +13,8 @@ import {
     flush,
     button,
     classList,
-    truncate
+    truncate,
+    cloneNode
 } from "./helpers"
 
 
@@ -610,25 +611,28 @@ export class DataTable {
 
         if (this.totalPages > 1) {
             const c = "pager"
-            const frag = document.createDocumentFragment()
             const prev = this.onFirstPage ? 1 : this.currentPage - 1
             const next = this.onlastPage ? this.totalPages : this.currentPage + 1
 
             // first button
             if (this.options.firstLast) {
-                frag.appendChild(button(c, 1, this.options.firstText))
+                each(this.pagers, pager => {
+                    pager.appendChild( button( c, 1, this.options.firstText ) )
+                })
             }
 
             // prev button
             if (this.options.nextPrev) {
-                frag.appendChild(button(c, prev, this.options.prevText))
+                each(this.pagers, pager => {
+                    pager.appendChild( button( c, prev, this.options.prevText ) )
+                });
             }
 
-            let pager = this.links
+            let links = this.links
 
             // truncate the links
             if (this.options.truncatePager) {
-                pager = truncate(
+                links = truncate(
                     this.links,
                     this.currentPage,
                     this.pages.length,
@@ -637,31 +641,31 @@ export class DataTable {
                 )
             }
 
-            // active page link
-            classList.add(this.links[this.currentPage - 1], "active")
-
-            // append the links
-            each(pager, p => {
-                classList.remove(p, "active")
-                frag.appendChild(p)
+            // active page link and append the links
+            each(links, (p, i) => {
+                if ( i === this.currentPage - 1 ) {
+                    classList.add(p, "active")
+                } else {
+                    classList.remove(p, "active")
+                }
+                each(this.pagers, pager => {
+                    pager.appendChild(cloneNode(p, true))
+                })
             })
-
-            classList.add(this.links[this.currentPage - 1], "active")
 
             // next button
             if (this.options.nextPrev) {
-                frag.appendChild(button(c, next, this.options.nextText))
+                each(this.pagers, pager => {
+                    pager.appendChild(button(c, next, this.options.nextText))
+                })
             }
 
             // first button
             if (this.options.firstLast) {
-                frag.appendChild(button(c, this.totalPages, this.options.lastText))
+                each(this.pagers, pager => {
+                    pager.appendChild(button(c, this.totalPages, this.options.lastText))
+                })
             }
-
-            // We may have more than one pager
-            each(this.pagers, pager => {
-                pager.appendChild(frag.cloneNode(true))
-            })
         }
     }
 

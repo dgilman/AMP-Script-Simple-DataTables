@@ -99,6 +99,32 @@ export const createElement = (a, b) => {
     return d
 }
 
+/**
+ * Clone node.
+ *
+ * This is a workaround where Element.cloneNode() seems to fail on some elements (e.g. tr and td).
+ *
+ * @param {Node|Element} node - Node
+ * @param {Boolean} deep - Deep cloning.
+ * @returns {Node} Cloned node.
+ */
+export const cloneNode = ( node, deep = false ) => {
+    if ( 1 !== node.nodeType ) {
+        return node.cloneNode( deep );
+    }
+
+    const cloned = document.createElement( node.nodeName );
+    for ( let i = 0; i < node.attributes.length; i++ ) {
+        cloned.setAttribute( node.attributes[i].name, node.attributes[i].value );
+    }
+
+    if ( deep ) {
+        cloned.innerHTML = node.innerHTML;
+    }
+
+    return cloned;
+};
+
 export const flush = (el, ie) => {
     if (typeof el.length === 'number') {
         each(el, e => {
