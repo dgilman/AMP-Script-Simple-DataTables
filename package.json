@@ -1,7 +1,7 @@
 {
-  "name": "simple-datatables",
+  "name": "amp-script-simple-datatables",
   "version": "2.1.6",
-  "description": "A lightweight, dependency-free JavaScript HTML table plugin.",
+  "description": "A lightweight, dependency-free JavaScript HTML table plugin for use with amp-script",
   "main": "dist/index.js",
   "jsdelivr": "dist/umd/simple-datatables.js",
   "unpkg": "dist/umd/simple-datatables.js",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fiduswriter/Simple-DataTables.git"
+    "url": "git+https://github.com/westonruter/AMP-Script-Simple-DataTables.git"
   },
   "keywords": [
     "DataTable",
@@ -31,11 +31,14 @@
     "sort"
   ],
   "author": "Johannes Wilm",
+  "contributors": [
+    "Weston Ruter"
+  ],
   "license": "LGPL-3.0",
   "bugs": {
-    "url": "https://github.com/fiduswriter/Simple-DataTables/issues"
+    "url": "https://github.com/westonruter/AMP-Script-Simple-DataTables/issues"
   },
-  "homepage": "https://github.com/fiduswriter/Simple-DataTables#readme",
+  "homepage": "https://github.com/westonruter/AMP-Script-Simple-DataTables#readme",
   "devDependencies": {
     "babel-eslint": "^10.0.1",
     "browserify": "^16.2.3",
