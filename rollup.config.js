@@ -14,7 +14,10 @@ export default [
             builtins(),
             globals(),
             buble({
-                transforms: {asyncAwait: false}
+                transforms: {
+                    asyncAwait: false,
+                    forOf: false
+                }
             }),
             terser()
         ],
@@ -33,7 +36,10 @@ export default [
             builtins(),
             globals(),
             buble({
-                transforms: {asyncAwait: false}
+                transforms: {
+                    asyncAwait: false,
+                    forOf: false
+                }
             }),
             terser()
         ],
@@ -52,7 +58,10 @@ export default [
             builtins(),
             globals(),
             buble({
-                transforms: {asyncAwait: false}
+                transforms: {
+                    asyncAwait: false,
+                    forOf: false
+                }
             }),
             terser()
         ],
