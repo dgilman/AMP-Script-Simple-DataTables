@@ -91,7 +91,6 @@ amp-script .dataTable-table {
 	width: 100%;
 	border-spacing: 0;
 	border-collapse: separate;
-	table-layout: fixed; /* Possible since the columns are computed server-side. */
 }
 
 amp-script .dataTable-table > tbody > tr > td,
