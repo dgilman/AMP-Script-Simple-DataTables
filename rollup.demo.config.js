@@ -13,7 +13,12 @@ export default [
             commonjs(),
             builtins(),
             globals(),
-            buble(),
+            buble({
+                transforms: {
+                    asyncAwait: false,
+                    forOf: false
+                }
+            }),
             terser()
         ],
         // ES module version, for modern browsers
@@ -30,7 +35,12 @@ export default [
             commonjs(),
             builtins(),
             globals(),
-            buble(),
+            buble({
+                transforms: {
+                    asyncAwait: false,
+                    forOf: false
+                }
+            }),
             terser()
         ],
         // SystemJS version, for older browsers

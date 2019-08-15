@@ -760,7 +760,7 @@ export class DataTable {
         })
 
         on(window, "resize", () => {
-            if ( this.options.prerendered ) {
+            if ( this.options.prerendered ) { // @todo Should thsi be this.finishPrerenderedInit();?
                 return;
             }
             this.updateRect()
