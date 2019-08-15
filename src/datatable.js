@@ -133,6 +133,12 @@ export class DataTable {
         for ( const row of this.data ) {
             row.hidden = false;
         }
+
+        this.sorting = false
+        if (!this.options.ajax) {
+            this.setColumns()
+        }
+
         this.fixColumns();
 
         this.options.prerendered = false;
@@ -436,6 +442,9 @@ export class DataTable {
             this.container.appendChild( this.table )
         }
 
+        // Note that the binding needs to happen before getBoundingClientRectAsync is invoked for some reason.
+        this.bindEvents()
+
         // Store the table dimensions
         await this.updateRect()
 
@@ -445,10 +454,11 @@ export class DataTable {
         this.activeHeadings = this.headings.slice()
 
         // Update
-        this.update()
-
-        if (!o.ajax && !o.prerendered) {
-            this.setColumns()
+        if ( !o.prerendered ) {
+            this.update()
+            if (!o.ajax) {
+                this.setColumns()
+            }
         }
 
         // Fix height
@@ -521,8 +531,6 @@ export class DataTable {
                 classList.add( this.wrapper, "fixed-columns" )
             }
         }
-
-        this.bindEvents()
     }
 
     /**
@@ -831,6 +839,7 @@ export class DataTable {
             })
         }
 
+        // @todo Why??
         if (this.hasRows) {
             each(this.data, (row, i) => {
                 row.dataIndex = i
@@ -938,6 +947,9 @@ export class DataTable {
      */
     fixColumns() {
 
+        // This is short-circuiting because the column widths can be determined server-side.
+        return;
+
         // Prevent fixing columns when the rect hasn't been set yet (such as when the header is rendering from a call in the initial render.
         if ( !this.rect || !this.rect.width || !this.rect.height ) {
             return;
@@ -967,8 +979,10 @@ export class DataTable {
                     cell.style.width = ""
                 }, this)
 
-                each(this.activeHeadings, function (cell, i) {
-                    const ow = cell.offsetWidth
+                each(this.activeHeadings, async function (cell, i) {
+                    // @todo This is not working. The width is 0.
+                    const cellRect = await cell.getBoundingClientRectAsync()
+                    const ow = cellRect.width
                     const w = ow / this.rect.width * 100
                     cell.style.width = `${w}%`
                     this.columnWidths[i] = ow
@@ -1024,8 +1038,10 @@ export class DataTable {
                 this.table.insertBefore(hd, this.body)
 
                 const widths = []
-                each(cells, function (cell, i) {
-                    const ow = cell.offsetWidth
+                each(cells, async function (cell, i) {
+                    // @todo This is not working. The width is 0.
+                    const cellRect = await cell.getBoundingClientRectAsync()
+                    const ow = cellRect.width
                     const w = ow / this.rect.width * 100
                     widths.push(w)
                     this.columnWidths[i] = ow
