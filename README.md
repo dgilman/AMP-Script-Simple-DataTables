@@ -2,7 +2,7 @@
 
 A lightweight, extendable, dependency-free javascript HTML table plugin. Similar to jQuery DataTables, but without the jQuery dependency. Forked version for use in [AMP](http://amp.dev) with [amp-script](https://amp.dev/documentation/components/amp-script/).
 
-Forked from [Simple-DataTables](https://github.com/fiduswriter/Simple-DataTables. Based on [Vanilla-DataTables](https://github.com/Mobius1/Vanilla-DataTables), but written in ES2018.
+Forked from [Simple-DataTables](https://github.com/fiduswriter/Simple-DataTables). Based on [Vanilla-DataTables](https://github.com/Mobius1/Vanilla-DataTables), but written in ES2018.
 
 ### License
 
