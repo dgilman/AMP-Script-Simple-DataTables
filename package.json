@@ -1,6 +1,6 @@
 {
   "name": "amp-script-simple-datatables",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight, dependency-free JavaScript HTML table plugin for use with amp-script",
   "main": "dist/index.js",
   "jsdelivr": "dist/umd/simple-datatables.js",
