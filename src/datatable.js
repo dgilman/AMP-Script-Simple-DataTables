@@ -734,7 +734,7 @@ export class DataTable {
         if (o.searchable) {
             this.input = this.wrapper.querySelector(".dataTable-input")
             if (this.input) {
-                on(this.input, "keyup", function () {
+                on(this.input, "input", function () {
                     that.finishPrerenderedInit();
                     that.search(this.value)
                 })
