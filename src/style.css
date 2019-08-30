@@ -156,12 +156,12 @@
 	top: 0px;
 }
 
-.asc .dataTable-sorter::after,
-.desc .dataTable-sorter::before {
+.dataTable-wrapper .asc .dataTable-sorter::after,
+.dataTable-wrapper .desc .dataTable-sorter::before {
 	opacity: 0.6;
 }
 
-.dataTables-empty {
+.dataTable-wrapper .dataTables-empty {
 	text-align: center;
 }
 
