@@ -8,28 +8,7 @@ import {terser} from 'rollup-plugin-terser'
 export default [
     {
         input: 'src/index.js',
-        plugins: [
-            resolve({browser: true}),
-            commonjs(),
-            builtins(),
-            globals(),
-            buble({
-                transforms: {
-                    asyncAwait: false,
-                    forOf: false
-                }
-            }),
-            terser()
-        ],
-        output: // ES module version, for modern browsers
-        {
-            dir: "dist/module",
-            format: "es",
-            sourcemap: true
-        }
-    },
-    {
-        input: 'src/index.js',
+        inlineDynamicImports: true,
         plugins: [
             resolve({browser: true}),
             commonjs(),
@@ -46,30 +25,9 @@ export default [
         output: // SystemJS version, for older browsers
         {
             dir: "dist/nomodule",
-            format: "system",
-            sourcemap: true
+            format: "iife",
+            name: "datatables",
+            sourcemap: false
         },
-    },
-    {
-        input: 'src/index.js',
-        plugins: [
-            resolve({browser: true}),
-            commonjs(),
-            builtins(),
-            globals(),
-            buble({
-                transforms: {
-                    asyncAwait: false,
-                    forOf: false
-                }
-            }),
-            terser()
-        ],
-        output: // CJS version
-        {
-            dir: "dist",
-            format: "cjs",
-            sourcemap: true
-        }
     }
 ]
